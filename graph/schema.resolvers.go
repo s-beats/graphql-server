@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/s-beats/graphql-server/graph/generated"
 	"github.com/s-beats/graphql-server/graph/model"
@@ -16,7 +17,24 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented"))
+	todos := []*model.Todo{}
+	rows, err := r.DB.Query("select * from todos")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(todos)
+		if err != nil {
+			return nil, err
+		}
+		log.Printf("get %#v", todos)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return todos, nil
 }
 
 func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, error) {
