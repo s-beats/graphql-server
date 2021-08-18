@@ -5,8 +5,10 @@ package graph
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/s-beats/graphql-server/graph/generated"
 	"github.com/s-beats/graphql-server/graph/model"
@@ -17,18 +19,35 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) 
 }
 
 func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	todos := []*model.Todo{}
+	todos := make([]*model.Todo, 1, 1)
 	rows, err := r.DB.Query("select * from todos")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
+	var i int
+	var (
+		id        int
+		title     string
+		text      string
+		userID    int
+		createdAt sql.NullTime
+		updatedAt sql.NullTime
+	)
 	for rows.Next() {
-		err := rows.Scan(todos)
+		todos[i] = new(model.Todo)
+		todos[i].User = new(model.User)
+		err := rows.Scan(&id, &title, &text, &userID, &createdAt, &updatedAt)
 		if err != nil {
 			return nil, err
 		}
 		log.Printf("get %#v", todos)
+		todos[i].ID = strconv.Itoa(id)
+		todos[i].Text = text
+		todos[i].Done = true
+		todos[i].User.ID = strconv.Itoa(userID)
+		i++
 	}
 	err = rows.Err()
 	if err != nil {
