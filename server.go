@@ -18,6 +18,13 @@ import (
 const defaultPort = ":8080"
 const defaultAddress = "127.0.0.1"
 
+func logMiddleware(h http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		h.ServeHTTP(w, r)
+		log.Printf("path: %v", r.URL)
+	}
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -41,12 +48,12 @@ func main() {
 	// extention handler
 	srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 		oc := graphql.GetOperationContext(ctx)
-		log.Printf("around: %s %s", oc.OperationName, oc.RawQuery)
+		log.Printf("query: %s", oc.RawQuery)
 		return next(ctx)
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", logMiddleware(srv))
 
 	log.Printf("connect to http://%s%s/ for GraphQL playground", address, port)
 	log.Fatal(http.ListenAndServe(address+port, nil))
