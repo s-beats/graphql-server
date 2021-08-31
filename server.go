@@ -13,6 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	redis "github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/s-beats/graphql-server/graph"
 	"github.com/s-beats/graphql-server/graph/generated"
@@ -40,11 +41,19 @@ func main() {
 
 	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/database")
 	if err != nil {
-		log.Fatal().Err(err).Msg("Openerror")
+		log.Fatal().Err(err).Msg("Open mysql error")
 	}
 	defer db.Close()
 	if err := db.Ping(); err != nil {
-		log.Fatal().Err(err).Msg("PingError")
+		log.Fatal().Err(err).Msg("Ping mysql error")
+	}
+
+	client := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	ctx := context.TODO()
+	if err := client.Ping(ctx).Err(); err != nil {
+		log.Fatal().Err(err).Msg("Ping redis error")
 	}
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
