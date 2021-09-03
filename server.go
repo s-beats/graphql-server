@@ -59,11 +59,11 @@ func main() {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{DB: db}}))
 	// extention handler
 	srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-		oc := graphql.GetOperationContext(ctx)
+		rawQuery := graphql.GetOperationContext(ctx).RawQuery
 
 		// format query
 		rp := regexp.MustCompile(`\n *| {2,}`)
-		q := rp.ReplaceAllString(oc.RawQuery, " ")
+		q := rp.ReplaceAllString(rawQuery, " ")
 		// trim right space
 		q = strings.TrimRight(q, " ")
 
