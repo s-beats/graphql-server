@@ -46,7 +46,6 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 		todos[i].ID = strconv.Itoa(id)
 		todos[i].Text = text
 		todos[i].Done = true
-		todos[i].User.ID = strconv.Itoa(userID)
 		i++
 	}
 	err = rows.Err()
