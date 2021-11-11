@@ -22,4 +22,3 @@ create table IF not exists todos
     PRIMARY KEY (`id`),
     FOREIGN KEY user_id(`user_id`) REFERENCES users(`id`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
