@@ -9,9 +9,9 @@ create table IF not exists users
     PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-DROP TABLE IF EXISTS todos;
+DROP TABLE IF EXISTS tasks;
 
-create table IF not exists todos
+create table IF not exists tasks
 (
     `id`               INT(20) AUTO_INCREMENT,
     `title`             VARCHAR(20) NOT NULL,

@@ -2,26 +2,37 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Item {
+type Task {
   id: ID!
-  unitPrice: Int!
-  amount: Int!
-  totalPrice: Int!
+  title: String!
+  text: String!
+  createdAt: Date!
+  updatedAt: Date!
 }
 
 type User {
   id: ID!
   name: String!
+  tasks: [Task!]!
 }
 
 type Query {
-  Items: [Item!]!
+  tasks: [Task!]!
+  users: [User!]!
 }
 
-input buyItemInput {
-  id: String!
+input createTaskInput {
+  userID: ID!
+  title: String!
+  text: String!
+}
+
+type createTaskPayload {
+  task: Task!
 }
 
 type Mutation {
-  buyIem(input: buyItemInput!): Item!
+  createTask(input: createTaskInput!): createTaskPayload!
 }
+
+scalar Date

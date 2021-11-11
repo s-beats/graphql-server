@@ -2,18 +2,26 @@
 
 package model
 
-type Item struct {
-	ID         string `json:"id"`
-	UnitPrice  int    `json:"unitPrice"`
-	Amount     int    `json:"amount"`
-	TotalPrice int    `json:"totalPrice"`
+type Task struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Text      string `json:"text"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID    string  `json:"id"`
+	Name  string  `json:"name"`
+	Tasks []*Task `json:"tasks"`
 }
 
-type BuyItemInput struct {
-	ID string `json:"id"`
+type CreateTaskInput struct {
+	UserID string `json:"userID"`
+	Title  string `json:"title"`
+	Text   string `json:"text"`
+}
+
+type CreateTaskPayload struct {
+	Task *Task `json:"task"`
 }

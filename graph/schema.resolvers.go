@@ -11,11 +11,15 @@ import (
 	"github.com/s-beats/graphql-todo/graph/model"
 )
 
-func (r *mutationResolver) BuyIem(ctx context.Context, input model.BuyItemInput) (*model.Item, error) {
+func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Items(ctx context.Context) ([]*model.Item, error) {
+func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
