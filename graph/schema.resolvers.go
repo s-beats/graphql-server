@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/s-beats/graphql-server/graph/generated"
-	"github.com/s-beats/graphql-server/graph/model"
+	"github.com/s-beats/graphql-todo/graph/generated"
+	"github.com/s-beats/graphql-todo/graph/model"
 )
 
 func (r *mutationResolver) BuyIem(ctx context.Context, input model.BuyItemInput) (*model.Item, error) {

@@ -15,8 +15,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	redis "github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/s-beats/graphql-server/graph"
-	"github.com/s-beats/graphql-server/graph/generated"
+	"github.com/s-beats/graphql-todo/graph"
+	"github.com/s-beats/graphql-todo/graph/generated"
 )
 
 const defaultPort = ":8080"

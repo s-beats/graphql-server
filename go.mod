@@ -1,4 +1,4 @@
-module github.com/s-beats/graphql-server
+module github.com/s-beats/graphql-todo
 
 go 1.16
 
