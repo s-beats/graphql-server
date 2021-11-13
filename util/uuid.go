@@ -6,10 +6,6 @@ func NewUUID() string {
 	return uuid.NewString()
 }
 
-func UUIDParse(id string) (string, error) {
-	parsedID, err := uuid.Parse(id)
-	if err != nil {
-		return "", err
-	}
-	return parsedID.String(), nil
+func UUIDMustParse(id string) string {
+	return uuid.MustParse(id).String()
 }
