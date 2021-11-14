@@ -2,12 +2,16 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Task struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	Text      string `json:"text"`
-	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type User struct {

@@ -8,11 +8,19 @@ import (
 	"fmt"
 
 	"github.com/s-beats/graphql-todo/graph/generated"
+	"github.com/s-beats/graphql-todo/graph/internal"
 	"github.com/s-beats/graphql-todo/graph/model"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error) {
-	panic(fmt.Errorf("not implemented"))
+	task, err := r.TaskUsecase.Create(ctx, input.Title, input.Text, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.CreateTaskPayload{
+		Task: internal.ConvertTask(task),
+	}, nil
 }
 
 func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {

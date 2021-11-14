@@ -1,12 +1,15 @@
 package usecase
 
 import (
-	"github.com/s-beats/graphql-todo/domain/model"
-	"github.com/s-beats/graphql-todo/domain/repository"
+	"context"
+
+	"github.com/s-beats/graphql-todo/domain"
+	"github.com/s-beats/graphql-todo/repository"
+	"github.com/s-beats/graphql-todo/util"
 )
 
 type Task interface {
-	Create(input *CreateTaskInput) (*CreateTaskOutput, error)
+	Create(ctx context.Context, title, text, userID string) (*domain.Task, error)
 }
 
 type task struct {
@@ -19,24 +22,21 @@ func NewTask(taskRepo repository.Task) Task {
 	}
 }
 
-type CreateTaskInput struct {
-	Title string
-	Text  string
-}
+func (t *task) Create(ctx context.Context, title, text, userID string) (*domain.Task, error) {
+	now := util.GetTimeNow()
+	task := domain.NewTask(
+		domain.NewTaskID(util.NewUUID()),
+		domain.NewTaskTitle(title),
+		domain.NewTaskText(text),
+		now,
+		now,
+		domain.NewUserID(userID),
+	)
 
-type CreateTaskOutput struct {
-	Task *model.Task
-}
-
-func (t *task) Create(input *CreateTaskInput) (*CreateTaskOutput, error) {
-	task := model.NewTask(input.Title, input.Text)
-
-	createdTask, err := t.taskRepository.Create(task)
+	err := t.taskRepository.Save(ctx, task)
 	if err != nil {
 		return nil, err
 	}
 
-	return &CreateTaskOutput{
-		Task: createdTask,
-	}, nil
+	return task, nil
 }

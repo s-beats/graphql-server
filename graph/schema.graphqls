@@ -6,8 +6,8 @@ type Task {
   id: ID!
   title: String!
   text: String!
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Time!
+  updatedAt: Time!
 }
 
 type User {
@@ -35,4 +35,4 @@ type Mutation {
   createTask(input: createTaskInput!): createTaskPayload!
 }
 
-scalar Date
+scalar Time
