@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/s-beats/graphql-todo/domain"
-	"github.com/s-beats/graphql-todo/repository"
+	"github.com/s-beats/graphql-todo/domain/repository"
 	"github.com/s-beats/graphql-todo/util"
 )
 
