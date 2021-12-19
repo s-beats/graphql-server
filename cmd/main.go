@@ -11,8 +11,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/s-beats/graphql-todo/domain/repository"
 	"github.com/s-beats/graphql-todo/handler"
-	"github.com/s-beats/graphql-todo/repository"
 	"github.com/s-beats/graphql-todo/usecase"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/mysqldialect"
