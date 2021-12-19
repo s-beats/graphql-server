@@ -13,4 +13,5 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.0.17
 	github.com/vektah/gqlparser/v2 v2.2.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	xorm.io/xorm v1.2.5
 )
