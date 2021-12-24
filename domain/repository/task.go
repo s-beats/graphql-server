@@ -10,6 +10,7 @@ import (
 
 type Task interface {
 	Save(ctx context.Context, task *domain.Task) error
+	GetOne(ctx context.Context, taskID domain.TaskID) (*domain.Task, error)
 }
 
 type task struct {
@@ -64,4 +65,8 @@ func (t *task) Save(ctx context.Context, task *domain.Task) error {
 	}
 
 	return nil
+}
+
+func (t *task) GetOne(ctx context.Context, taskID domain.TaskID) (*domain.Task, error) {
+	panic("not implement")
 }
