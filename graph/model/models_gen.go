@@ -3,15 +3,19 @@
 package model
 
 import (
+	"fmt"
+	"io"
+	"strconv"
 	"time"
 )
 
 type Task struct {
-	ID        string    `json:"id"`
-	Title     string    `json:"title"`
-	Text      string    `json:"text"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        string       `json:"id"`
+	Title     string       `json:"title"`
+	Text      string       `json:"text"`
+	Priority  TaskPriority `json:"priority"`
+	CreatedAt time.Time    `json:"createdAt"`
+	UpdatedAt time.Time    `json:"updatedAt"`
 }
 
 type User struct {
@@ -21,11 +25,55 @@ type User struct {
 }
 
 type CreateTaskInput struct {
-	UserID string `json:"userID"`
-	Title  string `json:"title"`
-	Text   string `json:"text"`
+	UserID   string       `json:"userID"`
+	Title    string       `json:"title"`
+	Text     string       `json:"text"`
+	Priority TaskPriority `json:"priority"`
 }
 
 type CreateTaskPayload struct {
 	Task *Task `json:"task"`
+}
+
+type TaskPriority string
+
+const (
+	TaskPriorityHigh   TaskPriority = "HIGH"
+	TaskPriorityMiddle TaskPriority = "MIDDLE"
+	TaskPriorityLow    TaskPriority = "LOW"
+)
+
+var AllTaskPriority = []TaskPriority{
+	TaskPriorityHigh,
+	TaskPriorityMiddle,
+	TaskPriorityLow,
+}
+
+func (e TaskPriority) IsValid() bool {
+	switch e {
+	case TaskPriorityHigh, TaskPriorityMiddle, TaskPriorityLow:
+		return true
+	}
+	return false
+}
+
+func (e TaskPriority) String() string {
+	return string(e)
+}
+
+func (e *TaskPriority) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TaskPriority(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TaskPriority", str)
+	}
+	return nil
+}
+
+func (e TaskPriority) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

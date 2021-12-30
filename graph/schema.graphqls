@@ -6,8 +6,15 @@ type Task {
   id: ID!
   title: String!
   text: String!
+  priority: TaskPriority!
   createdAt: Time!
   updatedAt: Time!
+}
+
+enum TaskPriority {
+  HIGH
+  MIDDLE
+  LOW
 }
 
 type User {
@@ -17,7 +24,7 @@ type User {
 }
 
 type Query {
-  tasks: [Task!]!
+  tasks(id: ID, priority: TaskPriority): [Task!]!
   users: [User!]!
 }
 
@@ -25,6 +32,7 @@ input createTaskInput {
   userID: ID!
   title: String!
   text: String!
+  priority: TaskPriority!
 }
 
 type createTaskPayload {

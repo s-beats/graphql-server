@@ -13,7 +13,7 @@ import (
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error) {
-	task, err := r.TaskUsecase.Create(ctx, input.Title, input.Text, input.UserID)
+	task, err := r.TaskUsecase.Create(ctx, input.Title, input.Text, input.UserID, input.Priority.String())
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTas
 	}, nil
 }
 
-func (r *queryResolver) Tasks(ctx context.Context) ([]*model.Task, error) {
+func (r *queryResolver) Tasks(ctx context.Context, id *string, priority *model.TaskPriority) ([]*model.Task, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

@@ -31,7 +31,8 @@ type TaskDTO struct {
 	Text      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	UserID    string
+	User      string
+	Priority  string
 }
 
 func (t *task) Save(ctx context.Context, task *domain.Task) error {
@@ -41,7 +42,8 @@ func (t *task) Save(ctx context.Context, task *domain.Task) error {
 		Text:      task.Text().String(),
 		CreatedAt: task.CreatedAt(),
 		UpdatedAt: task.UpdatedAt(),
-		UserID:    task.CreatedBy().String(),
+		User:      task.CreatedBy().ID().String(),
+		Priority:  task.Priority().Value(),
 	}
 
 	exists, err := t.db.NewSelect().Model((*TaskDTO)(nil)).Where("id = ?", taskDTO.ID).Exists(ctx)

@@ -12,10 +12,11 @@ type Task struct {
 	text      *TaskText
 	createdAt time.Time
 	updatedAt time.Time
-	createdBy *UserID
+	createdBy *User
+	priority  Priority
 }
 
-func NewTask(id *TaskID, title *TaskTitle, text *TaskText, createdAt, updatedAt time.Time, createdBy *UserID) *Task {
+func NewTask(id *TaskID, title *TaskTitle, text *TaskText, createdAt, updatedAt time.Time, createdBy *User, priority Priority) *Task {
 	return &Task{
 		id:        id,
 		title:     title,
@@ -23,6 +24,7 @@ func NewTask(id *TaskID, title *TaskTitle, text *TaskText, createdAt, updatedAt 
 		createdAt: createdAt,
 		updatedAt: updatedAt,
 		createdBy: createdBy,
+		priority:  priority,
 	}
 }
 
@@ -46,8 +48,12 @@ func (t *Task) UpdatedAt() time.Time {
 	return t.updatedAt
 }
 
-func (t *Task) CreatedBy() *UserID {
+func (t *Task) CreatedBy() *User {
 	return t.createdBy
+}
+
+func (t *Task) Priority() Priority {
+	return t.priority
 }
 
 type TaskID struct {

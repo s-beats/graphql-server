@@ -9,7 +9,7 @@ import (
 )
 
 type Task interface {
-	Create(ctx context.Context, title, text, userID string) (*domain.Task, error)
+	Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error)
 }
 
 type task struct {
@@ -22,7 +22,7 @@ func NewTask(taskRepo repository.Task) Task {
 	}
 }
 
-func (t *task) Create(ctx context.Context, title, text, userID string) (*domain.Task, error) {
+func (t *task) Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error) {
 	now := util.GetTimeNow()
 	task := domain.NewTask(
 		domain.NewTaskID(util.NewUUID()),
@@ -30,7 +30,8 @@ func (t *task) Create(ctx context.Context, title, text, userID string) (*domain.
 		domain.NewTaskText(text),
 		now,
 		now,
-		domain.NewUserID(userID),
+		domain.NewUser(domain.NewUserID(userID)),
+		domain.NewPriority(priority),
 	)
 
 	err := t.taskRepository.Save(ctx, task)

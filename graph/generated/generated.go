@@ -49,13 +49,14 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Tasks func(childComplexity int) int
+		Tasks func(childComplexity int, id *string, priority *model.TaskPriority) int
 		Users func(childComplexity int) int
 	}
 
 	Task struct {
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
+		Priority  func(childComplexity int) int
 		Text      func(childComplexity int) int
 		Title     func(childComplexity int) int
 		UpdatedAt func(childComplexity int) int
@@ -76,7 +77,7 @@ type MutationResolver interface {
 	CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error)
 }
 type QueryResolver interface {
-	Tasks(ctx context.Context) ([]*model.Task, error)
+	Tasks(ctx context.Context, id *string, priority *model.TaskPriority) ([]*model.Task, error)
 	Users(ctx context.Context) ([]*model.User, error)
 }
 
@@ -112,7 +113,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Tasks(childComplexity), true
+		args, err := ec.field_Query_tasks_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Tasks(childComplexity, args["id"].(*string), args["priority"].(*model.TaskPriority)), true
 
 	case "Query.users":
 		if e.complexity.Query.Users == nil {
@@ -134,6 +140,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.ID(childComplexity), true
+
+	case "Task.priority":
+		if e.complexity.Task.Priority == nil {
+			break
+		}
+
+		return e.complexity.Task.Priority(childComplexity), true
 
 	case "Task.text":
 		if e.complexity.Task.Text == nil {
@@ -256,8 +269,15 @@ type Task {
   id: ID!
   title: String!
   text: String!
+  priority: TaskPriority!
   createdAt: Time!
   updatedAt: Time!
+}
+
+enum TaskPriority {
+  HIGH
+  MIDDLE
+  LOW
 }
 
 type User {
@@ -267,7 +287,7 @@ type User {
 }
 
 type Query {
-  tasks: [Task!]!
+  tasks(id: ID, priority: TaskPriority): [Task!]!
   users: [User!]!
 }
 
@@ -275,6 +295,7 @@ input createTaskInput {
   userID: ID!
   title: String!
   text: String!
+  priority: TaskPriority!
 }
 
 type createTaskPayload {
@@ -321,6 +342,30 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_tasks_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *model.TaskPriority
+	if tmp, ok := rawArgs["priority"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+		arg1, err = ec.unmarshalOTaskPriority2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["priority"] = arg1
 	return args, nil
 }
 
@@ -420,9 +465,16 @@ func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.Coll
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_tasks_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tasks(rctx)
+		return ec.resolvers.Query().Tasks(rctx, args["id"].(*string), args["priority"].(*model.TaskPriority))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -648,6 +700,41 @@ func (ec *executionContext) _Task_text(ctx context.Context, field graphql.Collec
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_priority(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Task",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Priority, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.TaskPriority)
+	fc.Result = res
+	return ec.marshalNTaskPriority2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Task_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
@@ -2015,6 +2102,14 @@ func (ec *executionContext) unmarshalInputcreateTaskInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
+		case "priority":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("priority"))
+			it.Priority, err = ec.unmarshalNTaskPriority2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -2141,6 +2236,11 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "text":
 			out.Values[i] = ec._Task_text(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "priority":
+			out.Values[i] = ec._Task_priority(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2578,6 +2678,16 @@ func (ec *executionContext) marshalNTask2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphql�
 	return ec._Task(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNTaskPriority2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx context.Context, v interface{}) (model.TaskPriority, error) {
+	var res model.TaskPriority
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTaskPriority2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx context.Context, sel ast.SelectionSet, v model.TaskPriority) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2947,6 +3057,21 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalID(*v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2969,6 +3094,22 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) unmarshalOTaskPriority2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx context.Context, v interface{}) (*model.TaskPriority, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.TaskPriority)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTaskPriority2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTaskPriority(ctx context.Context, sel ast.SelectionSet, v *model.TaskPriority) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
