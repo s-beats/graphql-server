@@ -9,22 +9,19 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/rs/zerolog v1.23.0
 	github.com/uptrace/bun v1.0.17
-	github.com/uptrace/bun/dialect/mysqldialect v1.0.17
-	github.com/uptrace/bun/extra/bundebug v1.0.17
 	github.com/vektah/gqlparser/v2 v2.2.0
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 	xorm.io/xorm v1.2.5
 )
 
 require (
 	github.com/agnivade/levenshtein v1.1.0 // indirect
-	github.com/fatih/color v1.13.0 // indirect
 	github.com/goccy/go-json v0.7.4 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
-	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

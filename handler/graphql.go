@@ -19,20 +19,6 @@ func GraphQLHandler(taskUsecase usecase.Task) http.HandlerFunc {
 		),
 		)
 
-		// extention handler
-		// srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-		// 	rawQuery := graphql.GetOperationContext(ctx).RawQuery
-
-		// 	// format query
-		// 	rp := regexp.MustCompile(`\n *| {2,}`)
-		// 	q := rp.ReplaceAllString(rawQuery, " ")
-		// 	// trim right space
-		// 	q = strings.TrimRight(q, " ")
-		// 	log.Debug().Str("query", q).Send()
-
-		// 	return next(ctx)
-		// })
-
 		srv.ServeHTTP(w, r)
 	}
 }

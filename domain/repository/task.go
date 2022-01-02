@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/s-beats/graphql-todo/domain"
-	"github.com/uptrace/bun"
+	"golang.org/x/xerrors"
+	"xorm.io/xorm"
 )
 
 type Task interface {
@@ -14,56 +16,64 @@ type Task interface {
 }
 
 type task struct {
-	db *bun.DB
+	db *xorm.Engine
 }
 
-func NewTask(db *bun.DB) Task {
+func NewTask(db *xorm.Engine) Task {
 	return &task{
 		db: db,
 	}
 }
 
 type TaskDTO struct {
-	bun.BaseModel `bun:"tasks"`
+	ID         string `xorm:"'id'"`
+	Title      string
+	Text       string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	UserID     string `xorm:"'user_id'"`
+	PriorityID string `xorm:"'priority_id'"`
+}
 
-	ID        string
-	Title     string
-	Text      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	User      string
-	Priority  string
+func (t *TaskDTO) TableName() string {
+	return "tasks"
 }
 
 func (t *task) Save(ctx context.Context, task *domain.Task) error {
-	taskDTO := TaskDTO{
+	taskDTO := &TaskDTO{
 		ID:        task.ID().String(),
 		Title:     task.Title().String(),
 		Text:      task.Text().String(),
 		CreatedAt: task.CreatedAt(),
 		UpdatedAt: task.UpdatedAt(),
-		User:      task.CreatedBy().ID().String(),
-		Priority:  task.Priority().Value(),
+		UserID:    task.CreatedBy().ID().String(),
 	}
 
-	exists, err := t.db.NewSelect().Model((*TaskDTO)(nil)).Where("id = ?", taskDTO.ID).Exists(ctx)
+	exists, err := t.db.Table(taskDTO.TableName()).Where("id = ?", taskDTO.ID).Exist()
 	if err != nil {
-		panic(err)
+		return xerrors.Errorf("%v", err)
 	}
+
+	var taskPriorityID int
+	has, err := t.db.Table("task_priorities").Cols("id").Where("value = ?", task.Priority().Value()).Get(&taskPriorityID)
+	if err != nil {
+		return xerrors.Errorf("%v", err)
+	}
+	if !has {
+		return xerrors.New("invalid task priority")
+	}
+	taskDTO.PriorityID = strconv.Itoa(taskPriorityID)
+
 	if exists {
-		_, err := t.db.NewUpdate().
-			Model(&taskDTO).
-			Where("id = ?", taskDTO.ID).
-			Exec(ctx)
+		_, err := t.db.ID(taskDTO.ID).Update(taskDTO)
 		if err != nil {
-			return err
+			return xerrors.Errorf("%v", err)
 		}
 	} else {
-		_, err := t.db.NewInsert().Model(&taskDTO).Exec(ctx)
+		_, err := t.db.Insert(taskDTO)
 		if err != nil {
-			return err
+			return xerrors.Errorf("%v", err)
 		}
-
 	}
 
 	return nil
