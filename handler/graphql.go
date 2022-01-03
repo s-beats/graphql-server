@@ -9,12 +9,13 @@ import (
 	"github.com/s-beats/graphql-todo/usecase"
 )
 
-func GraphQLHandler(taskUsecase usecase.Task) http.HandlerFunc {
+func GraphQLHandler(taskUsecase usecase.Task, userUsecase usecase.User) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		srv := handler.NewDefaultServer(generated.NewExecutableSchema(
 			generated.Config{
 				Resolvers: &graph.Resolver{
 					TaskUsecase: taskUsecase,
+					UserUsecase: userUsecase,
 				}},
 		),
 		)

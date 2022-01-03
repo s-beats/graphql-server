@@ -1,14 +1,18 @@
 package domain
 
-import "github.com/s-beats/graphql-todo/util"
+import (
+	"github.com/s-beats/graphql-todo/util"
+)
 
 type User struct {
-	id *UserID
+	id   *UserID
+	name string
 }
 
-func NewUser(id *UserID) *User {
+func NewUser(id *UserID, name string) *User {
 	return &User{
-		id: id,
+		id:   id,
+		name: name,
 	}
 }
 
@@ -28,4 +32,8 @@ func NewUserID(id string) *UserID {
 	return &UserID{
 		id: util.UUIDMustParse(id),
 	}
+}
+
+func (u *User) Name() string {
+	return u.name
 }

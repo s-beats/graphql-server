@@ -35,6 +35,14 @@ type CreateTaskPayload struct {
 	Task *Task `json:"task"`
 }
 
+type CreateUserInput struct {
+	Name string `json:"name"`
+}
+
+type CreateUserPayload struct {
+	User *User `json:"user"`
+}
+
 type TaskPriority string
 
 const (

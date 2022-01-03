@@ -37,10 +37,16 @@ func main() {
 	}
 
 	taskRepo := repository.NewTask(db)
-	taskUsecase := usecase.NewTask(taskRepo)
+	userRepo := repository.NewUser(db)
+
+	taskUsecase := usecase.NewTask(taskRepo, userRepo)
+	userUsecase := usecase.NewUser(userRepo)
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", logMiddleware(handler.GraphQLHandler(taskUsecase)))
+	http.Handle("/query", logMiddleware(handler.GraphQLHandler(
+		taskUsecase,
+		userUsecase,
+	)))
 
 	address := os.Getenv("HOST")
 	port := os.Getenv("PORT")

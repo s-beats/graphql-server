@@ -23,6 +23,17 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTas
 	}, nil
 }
 
+func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.CreateUserPayload, error) {
+	user, err := r.UserUsecase.Create(ctx, input.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.CreateUserPayload{
+		User: internal.ConvertUser(user),
+	}, nil
+}
+
 func (r *queryResolver) Tasks(ctx context.Context, id *string, priority *model.TaskPriority) ([]*model.Task, error) {
 	panic(fmt.Errorf("not implemented"))
 }

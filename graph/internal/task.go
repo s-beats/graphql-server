@@ -19,3 +19,10 @@ func ConvertTask(task *domain.Task) *model.Task {
 		Priority:  priority,
 	}
 }
+
+func ConvertUser(user *domain.User) *model.User {
+	return &model.User{
+		ID:   user.ID().String(),
+		Name: user.Name(),
+	}
+}

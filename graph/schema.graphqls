@@ -39,8 +39,17 @@ type createTaskPayload {
   task: Task!
 }
 
+input createUserInput {
+  name: String!
+}
+
+type createUserPayload {
+  user: User!
+}
+
 type Mutation {
   createTask(input: createTaskInput!): createTaskPayload!
+  createUser(input: createUserInput!): createUserPayload!
 }
 
 scalar Time

@@ -46,6 +46,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Mutation struct {
 		CreateTask func(childComplexity int, input model.CreateTaskInput) int
+		CreateUser func(childComplexity int, input model.CreateUserInput) int
 	}
 
 	Query struct {
@@ -71,10 +72,15 @@ type ComplexityRoot struct {
 	CreateTaskPayload struct {
 		Task func(childComplexity int) int
 	}
+
+	CreateUserPayload struct {
+		User func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
 	CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error)
+	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.CreateUserPayload, error)
 }
 type QueryResolver interface {
 	Tasks(ctx context.Context, id *string, priority *model.TaskPriority) ([]*model.Task, error)
@@ -107,6 +113,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateTask(childComplexity, args["input"].(model.CreateTaskInput)), true
+
+	case "Mutation.createUser":
+		if e.complexity.Mutation.CreateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(model.CreateUserInput)), true
 
 	case "Query.tasks":
 		if e.complexity.Query.Tasks == nil {
@@ -196,6 +214,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreateTaskPayload.Task(childComplexity), true
+
+	case "createUserPayload.user":
+		if e.complexity.CreateUserPayload.User == nil {
+			break
+		}
+
+		return e.complexity.CreateUserPayload.User(childComplexity), true
 
 	}
 	return 0, false
@@ -302,8 +327,17 @@ type createTaskPayload {
   task: Task!
 }
 
+input createUserInput {
+  name: String!
+}
+
+type createUserPayload {
+  user: User!
+}
+
 type Mutation {
   createTask(input: createTaskInput!): createTaskPayload!
+  createUser(input: createUserInput!): createUserPayload!
 }
 
 scalar Time
@@ -322,6 +356,21 @@ func (ec *executionContext) field_Mutation_createTask_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNcreateTaskInput2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateTaskInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.CreateUserInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNcreateUserInput2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -447,6 +496,48 @@ func (ec *executionContext) _Mutation_createTask(ctx context.Context, field grap
 	res := resTmp.(*model.CreateTaskPayload)
 	fc.Result = res
 	return ec.marshalNcreateTaskPayload2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateTaskPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createUser_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateUser(rctx, args["input"].(model.CreateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.CreateUserPayload)
+	fc.Result = res
+	return ec.marshalNcreateUserPayload2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateUserPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_tasks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2065,6 +2156,41 @@ func (ec *executionContext) _createTaskPayload_task(ctx context.Context, field g
 	return ec.marshalNTask2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐTask(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _createUserPayload_user(ctx context.Context, field graphql.CollectedField, obj *model.CreateUserPayload) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "createUserPayload",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -2116,6 +2242,29 @@ func (ec *executionContext) unmarshalInputcreateTaskInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputcreateUserInput(ctx context.Context, obj interface{}) (model.CreateUserInput, error) {
+	var it model.CreateUserInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2141,6 +2290,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "createTask":
 			out.Values[i] = ec._Mutation_createTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createUser":
+			out.Values[i] = ec._Mutation_createUser(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2561,6 +2715,33 @@ func (ec *executionContext) _createTaskPayload(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("createTaskPayload")
 		case "task":
 			out.Values[i] = ec._createTaskPayload_task(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var createUserPayloadImplementors = []string{"createUserPayload"}
+
+func (ec *executionContext) _createUserPayload(ctx context.Context, sel ast.SelectionSet, obj *model.CreateUserPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createUserPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("createUserPayload")
+		case "user":
+			out.Values[i] = ec._createUserPayload_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3031,6 +3212,25 @@ func (ec *executionContext) marshalNcreateTaskPayload2ᚖgithubᚗcomᚋsᚑbeat
 		return graphql.Null
 	}
 	return ec._createTaskPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNcreateUserInput2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
+	res, err := ec.unmarshalInputcreateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNcreateUserPayload2githubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateUserPayload(ctx context.Context, sel ast.SelectionSet, v model.CreateUserPayload) graphql.Marshaler {
+	return ec._createUserPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNcreateUserPayload2ᚖgithubᚗcomᚋsᚑbeatsᚋgraphqlᚑtodoᚋgraphᚋmodelᚐCreateUserPayload(ctx context.Context, sel ast.SelectionSet, v *model.CreateUserPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._createUserPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

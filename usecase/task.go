@@ -14,15 +14,22 @@ type Task interface {
 
 type task struct {
 	taskRepository repository.Task
+	userRepository repository.User
 }
 
-func NewTask(taskRepo repository.Task) Task {
+func NewTask(taskRepo repository.Task, userRepo repository.User) Task {
 	return &task{
 		taskRepository: taskRepo,
+		userRepository: userRepo,
 	}
 }
 
 func (t *task) Create(ctx context.Context, title, text, userID, priority string) (*domain.Task, error) {
+	user, err := t.userRepository.GetOne(ctx, *domain.NewUserID(userID))
+	if err != nil {
+		return nil, err
+	}
+
 	now := util.GetTimeNow()
 	task := domain.NewTask(
 		domain.NewTaskID(util.NewUUID()),
@@ -30,12 +37,11 @@ func (t *task) Create(ctx context.Context, title, text, userID, priority string)
 		domain.NewTaskText(text),
 		now,
 		now,
-		domain.NewUser(domain.NewUserID(userID)),
+		user,
 		domain.NewPriority(priority),
 	)
 
-	err := t.taskRepository.Save(ctx, task)
-	if err != nil {
+	if err := t.taskRepository.Save(ctx, task); err != nil {
 		return nil, err
 	}
 
