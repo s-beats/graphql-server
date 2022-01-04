@@ -65,7 +65,7 @@ func (t *user) Save(ctx context.Context, user *domain.User) error {
 
 func (t *user) GetOne(ctx context.Context, userID domain.UserID) (*domain.User, error) {
 	userDTO := UserDTO{ID: userID.String()}
-	has, err := t.db.Get(userDTO)
+	has, err := t.db.Get(&userDTO)
 	if err != nil {
 		return nil, err
 	}
