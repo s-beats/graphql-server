@@ -1,6 +1,6 @@
 module github.com/s-beats/graphql-todo
 
-go 1.17
+go 1.18
 
 require (
 	github.com/99designs/gqlgen v0.13.1-0.20210729011107-9a214e80158b
