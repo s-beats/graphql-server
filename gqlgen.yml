@@ -15,7 +15,7 @@ resolver:
   package: graph
 
 autobind:
-  - "github.com/s-beats/graphql-todo/graph/model"
+#   - "github.com/s-beats/graphql-todo/graph/model"
 
 models:
   ID:
