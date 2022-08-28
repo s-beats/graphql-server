@@ -23,6 +23,8 @@ require (
 	github.com/mitchellh/mapstructure v1.3.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
+	github.com/samber/lo v1.27.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	xorm.io/builder v0.3.9 // indirect
 )

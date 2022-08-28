@@ -6,10 +6,12 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/s-beats/graphql-todo/graph/generated"
 	"github.com/s-beats/graphql-todo/graph/internal"
 	"github.com/s-beats/graphql-todo/graph/model"
+	"github.com/samber/lo"
 )
 
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error) {
@@ -39,11 +41,19 @@ func (r *queryResolver) Tasks(ctx context.Context, id *string, priority *model.T
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return lo.RepeatBy(10, func(i int) *model.User {
+		return &model.User{ID: fmt.Sprintf("id%d", i)}
+	}), nil
 }
 
 func (r *userResolver) Tasks(ctx context.Context, obj *model.User) ([]*model.Task, error) {
-	panic(fmt.Errorf("not implemented"))
+	// 並行処理されるので、id1以外は先に取得される
+	if obj.ID == "id1" {
+		time.Sleep(10 * time.Second)
+	}
+	return lo.RepeatBy(10, func(i int) *model.Task {
+		return &model.Task{ID: fmt.Sprintf("id%d", i)}
+	}), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
