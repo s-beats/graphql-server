@@ -6,12 +6,15 @@ package graph
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/s-beats/graphql-todo/graph/generated"
 	"github.com/s-beats/graphql-todo/graph/internal"
 	"github.com/s-beats/graphql-todo/graph/model"
+	"github.com/samber/lo"
 )
 
+// CreateTask is the resolver for the createTask field.
 func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTaskInput) (*model.CreateTaskPayload, error) {
 	task, err := r.TaskUsecase.Create(ctx, input.Title, input.Text, input.UserID, input.Priority.String())
 	if err != nil {
@@ -23,6 +26,7 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTas
 	}, nil
 }
 
+// CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.CreateUserPayload, error) {
 	user, err := r.UserUsecase.Create(ctx, input.Name)
 	if err != nil {
@@ -34,16 +38,35 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	}, nil
 }
 
+// Tasks is the resolver for the tasks field.
 func (r *queryResolver) Tasks(ctx context.Context, id *string, priority *model.TaskPriority) ([]*model.Task, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
+// Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return lo.RepeatBy(10, func(i int) *model.User {
+		return &model.User{ID: fmt.Sprintf("id%d", i)}
+	}), nil
 }
 
+// Name is the resolver for the name field.
+func (r *userResolver) Name(ctx context.Context, obj *model.User) (string, error) {
+	time.Sleep(10 * time.Second)
+	fmt.Printf("name%s\n", obj.ID)
+	return fmt.Sprintf("name%s", obj.ID), nil
+}
+
+// Tasks is the resolver for the tasks field.
 func (r *userResolver) Tasks(ctx context.Context, obj *model.User) ([]*model.Task, error) {
-	panic(fmt.Errorf("not implemented"))
+	// 並行処理されるので、id1以外は先に取得される
+	if obj.ID == "id1" {
+		time.Sleep(10 * time.Second)
+	}
+	fmt.Printf("tasks %s\n", obj.ID)
+	return lo.RepeatBy(10, func(i int) *model.Task {
+		return &model.Task{ID: fmt.Sprintf("id%d", i)}
+	}), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

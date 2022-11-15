@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/s-beats/graphql-todo/domain/repository"
 	"github.com/s-beats/graphql-todo/handler"
 	"github.com/s-beats/graphql-todo/infra/rdb"
+	"github.com/s-beats/graphql-todo/queryservice"
 	"github.com/s-beats/graphql-todo/usecase"
 )
 
@@ -39,16 +41,16 @@ func main() {
 	taskRepo := repository.NewTask(db)
 	userRepo := repository.NewUser(db)
 
-	taskUsecase := usecase.NewTask(taskRepo, userRepo)
-	userUsecase := usecase.NewUser(userRepo)
-
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", logMiddleware(handler.GraphQLHandler(
-		taskUsecase,
-		userUsecase,
+		usecase.NewTask(taskRepo, userRepo),
+		usecase.NewUser(userRepo),
+		queryservice.NewTask(),
+		queryservice.NewUser(),
 	)))
 
 	address := os.Getenv("HOST")
 	port := os.Getenv("PORT")
+	fmt.Printf("start server http://%s:%s/", address, port)
 	log.Fatal().Err(http.ListenAndServe(address+":"+port, nil)).Send()
 }
