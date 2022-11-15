@@ -52,4 +52,12 @@ type Mutation {
   createUser(input: createUserInput!): createUserPayload!
 }
 
+type testSubscriptionPayload {
+  subscriptionID: String!
+}
+
+type Subscription {
+  TestSubscription(subscriptionID: String!): testSubscriptionPayload
+}
+
 scalar Time

@@ -50,6 +50,11 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	}), nil
 }
 
+// TestSubscription is the resolver for the TestSubscription field.
+func (r *subscriptionResolver) TestSubscription(ctx context.Context, subscriptionID string) (<-chan *model.TestSubscriptionPayload, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Name is the resolver for the name field.
 func (r *userResolver) Name(ctx context.Context, obj *model.User) (string, error) {
 	time.Sleep(10 * time.Second)
@@ -75,9 +80,13 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Subscription returns generated.SubscriptionResolver implementation.
+func (r *Resolver) Subscription() generated.SubscriptionResolver { return &subscriptionResolver{r} }
+
 // User returns generated.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

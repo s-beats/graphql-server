@@ -43,6 +43,10 @@ type CreateUserPayload struct {
 	User *User `json:"user"`
 }
 
+type TestSubscriptionPayload struct {
+	SubscriptionID string `json:"subscriptionID"`
+}
+
 type TaskPriority string
 
 const (
