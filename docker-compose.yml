@@ -19,3 +19,10 @@ services:
       - ./script:/var/script
     ports:
       - 3306:3306
+
+  redis:
+    image: redis:6.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis:/data"
