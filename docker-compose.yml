@@ -4,7 +4,6 @@ services:
   # MySQL
   db:
     image: mysql:5.7
-    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: database
@@ -25,4 +24,4 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - "redis:/data"
+      - "./docker/redis:/data"
