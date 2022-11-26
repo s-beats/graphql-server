@@ -1,23 +1,43 @@
 package rdb
 
 import (
-	"fmt"
+	"database/sql"
 	"os"
+	"time"
 
-	_ "github.com/go-sql-driver/mysql"
-	"xorm.io/xorm"
+	"github.com/go-sql-driver/mysql"
+	"github.com/rs/zerolog"
+	sqldblogger "github.com/simukti/sqldb-logger"
+	"github.com/simukti/sqldb-logger/logadapter/zerologadapter"
 )
 
-func NewDB() (*xorm.Engine, error) {
-	return xorm.NewEngine("mysql", getDataSourceName())
+func NewQueries() (*Queries, error) {
+	db, err := sql.Open("mysql", getDataSourceName())
+	if err != nil {
+		return nil, err
+	}
+	logger := zerolog.New(
+		zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false},
+	)
+	db = sqldblogger.OpenDriver(
+		getDataSourceName(),
+		db.Driver(),
+		zerologadapter.New(logger),
+	)
+	return New(db), nil
 }
 
 func getDataSourceName() string {
-	// Set data source name
-	dbHost := os.Getenv("DATABASE_HOST")
-	dbPort := os.Getenv("DATABASE_PORT")
-	dbUser := os.Getenv("DATABASE_USER")
-	dbPass := os.Getenv("DATABASE_PASS")
-	dbName := os.Getenv("DATABASE_NAME")
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
+	c := mysql.Config{
+		Net:                  "tcp",
+		Addr:                 os.Getenv("MYSQL_HOST"),
+		User:                 os.Getenv("MYSQL_USER"),
+		Passwd:               os.Getenv("MYSQL_PASSWORD"),
+		DBName:               os.Getenv("MYSQL_NAME"),
+		Loc:                  time.UTC,
+		Collation:            "utf8mb4_general_ci",
+		ParseTime:            true,
+		AllowNativePasswords: true,
+	}
+	return c.FormatDSN()
 }

@@ -10,7 +10,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/s-beats/graphql-todo/domain/repository"
 	"github.com/s-beats/graphql-todo/handler"
 	"github.com/s-beats/graphql-todo/infra/rdb"
 	"github.com/s-beats/graphql-todo/queryservice"
@@ -20,7 +19,7 @@ import (
 func init() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Warn().Err(err).Msg(("Error loading .env file"))
+		log.Warn().Err(err).Msg("Error loading .env file")
 	}
 }
 
@@ -33,24 +32,21 @@ func logMiddleware(h http.Handler) http.HandlerFunc {
 }
 
 func main() {
-	db, err := rdb.NewDB()
+	queries, err := rdb.NewQueries()
 	if err != nil {
-		log.Fatal().Err(err)
+		log.Fatal().Err(err).Send()
 	}
-
-	taskRepo := repository.NewTask(db)
-	userRepo := repository.NewUser(db)
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", logMiddleware(handler.GraphQLHandler(
-		usecase.NewTask(taskRepo, userRepo),
-		usecase.NewUser(userRepo),
-		queryservice.NewTask(),
+		usecase.NewTask(queries),
+		usecase.NewUser(queries),
+		queryservice.NewTask(queries),
 		queryservice.NewUser(),
 	)))
 
 	address := os.Getenv("HOST")
 	port := os.Getenv("PORT")
-	fmt.Printf("start server http://%s:%s/", address, port)
+	fmt.Printf("start server http://%s:%s/\n", address, port)
 	log.Fatal().Err(http.ListenAndServe(address+":"+port, nil)).Send()
 }

@@ -6,11 +6,11 @@ package graph
 import (
 	"context"
 	"fmt"
-	"time"
+	"log"
 
 	"github.com/s-beats/graphql-todo/graph/generated"
-	"github.com/s-beats/graphql-todo/graph/internal"
 	"github.com/s-beats/graphql-todo/graph/model"
+	"github.com/s-beats/graphql-todo/infra/rdb"
 	"github.com/samber/lo"
 )
 
@@ -20,10 +20,18 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input model.CreateTas
 	if err != nil {
 		return nil, err
 	}
-
+	if err := r.RedisClient.Publish(ctx, "pubsub_task", input.Text).Err(); err != nil {
+		log.Println("failed to publish", err)
+	}
 	return &model.CreateTaskPayload{
-		Task: internal.ConvertTask(task),
-	}, nil
+		Task: &model.Task{
+			ID:    task.ID,
+			Title: task.Title,
+			Text:  task.Text,
+			// FIXME: priority
+			CreatedAt: task.CreatedAt,
+			UpdatedAt: task.UpdatedAt,
+		}}, nil
 }
 
 // CreateUser is the resolver for the createUser field.
@@ -34,43 +42,74 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	}
 
 	return &model.CreateUserPayload{
-		User: internal.ConvertUser(user),
+		User: &model.User{
+			ID:   user.ID,
+			Name: user.Name,
+		},
 	}, nil
 }
 
 // Tasks is the resolver for the tasks field.
 func (r *queryResolver) Tasks(ctx context.Context, id *string, priority *model.TaskPriority) ([]*model.Task, error) {
-	panic(fmt.Errorf("not implemented"))
+	tasks, err := r.TaskQueryService.Search(ctx, rdb.SearchTasksParams{
+		ID: lo.FromPtr(id),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return lo.Map(tasks, func(task *rdb.Task, _ int) *model.Task {
+		return &model.Task{
+			ID:    task.ID,
+			Title: task.Title,
+			Text:  task.Text,
+			// FIXME: priority
+			CreatedAt: task.CreatedAt,
+			UpdatedAt: task.UpdatedAt,
+		}
+	}), nil
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	return lo.RepeatBy(10, func(i int) *model.User {
-		return &model.User{ID: fmt.Sprintf("id%d", i)}
-	}), nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 // TestSubscription is the resolver for the TestSubscription field.
 func (r *subscriptionResolver) TestSubscription(ctx context.Context, subscriptionID string) (<-chan *model.TestSubscriptionPayload, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-// Name is the resolver for the name field.
-func (r *userResolver) Name(ctx context.Context, obj *model.User) (string, error) {
-	time.Sleep(10 * time.Second)
-	fmt.Printf("name%s\n", obj.ID)
-	return fmt.Sprintf("name%s", obj.ID), nil
+	ch := make(chan *model.TestSubscriptionPayload)
+	r.TaskChannels = append(r.TaskChannels, ch)
+	go func() {
+		<-ctx.Done()
+		log.Println("close subscription")
+		r.TaskChannelsMutex.Lock()
+		defer r.TaskChannelsMutex.Unlock()
+		for i, c := range r.TaskChannels {
+			if c == ch {
+				r.TaskChannels = append(r.TaskChannels[:i], r.TaskChannels[i+1:]...)
+				break
+			}
+		}
+	}()
+	return ch, nil
 }
 
 // Tasks is the resolver for the tasks field.
 func (r *userResolver) Tasks(ctx context.Context, obj *model.User) ([]*model.Task, error) {
-	// 並行処理されるので、id1以外は先に取得される
-	if obj.ID == "id1" {
-		time.Sleep(10 * time.Second)
+	tasks, err := r.TaskQueryService.Search(ctx, rdb.SearchTasksParams{
+		UserID: obj.ID,
+	})
+	if err != nil {
+		return nil, err
 	}
-	fmt.Printf("tasks %s\n", obj.ID)
-	return lo.RepeatBy(10, func(i int) *model.Task {
-		return &model.Task{ID: fmt.Sprintf("id%d", i)}
+	return lo.Map(tasks, func(task *rdb.Task, _ int) *model.Task {
+		return &model.Task{
+			ID:    task.ID,
+			Title: task.Title,
+			Text:  task.Text,
+			// FIXME: priority
+			CreatedAt: task.CreatedAt,
+			UpdatedAt: task.UpdatedAt,
+		}
 	}), nil
 }
 

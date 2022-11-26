@@ -39,5 +39,3 @@ models:
     fields:
       tasks:
         resolver: true
-      name:
-        resolver: true

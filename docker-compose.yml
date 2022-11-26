@@ -3,23 +3,19 @@ version: '3'
 services:
   # MySQL
   db:
+    container_name: graphql-todo-mysql
     image: mysql:5.7
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: database
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
-      TZ: 'Asia/Tokyo'
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+      MYSQL_ROOT_PASSWORD: password
     volumes:
       - ./docker/db/data:/var/lib/mysql
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./mysql/task.ddl:/var/ddl/task.ddl
+      - ./mysql/schema.sql:/var/ddl/schema.sql
       - ./script:/var/script
     ports:
       - 3306:3306
 
   redis:
+    container_name: graphql-todo-redis
     image: redis:6.0-alpine
     ports:
       - "6379:6379"

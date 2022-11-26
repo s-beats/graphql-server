@@ -2,31 +2,39 @@ package queryservice
 
 import (
 	"context"
-	"errors"
 
-	"github.com/s-beats/graphql-todo/domain"
+	"github.com/s-beats/graphql-todo/infra/rdb"
+	"github.com/samber/lo"
 )
 
-var dummyTasks = map[domain.TaskID]*domain.Task{
-	*domain.NewTaskID("3b671140-c499-4750-82f5-f015faae25e5"): &domain.Task{},
-	*domain.NewTaskID("c49c0c71-2739-4979-bd6c-939aad5bf6b0"): &domain.Task{},
-}
-
 type Task interface {
-	GetByID(ctx context.Context, id domain.TaskID) (*domain.Task, error)
+	Search(ctx context.Context, params rdb.SearchTasksParams) ([]*rdb.Task, error)
+	GetByID(ctx context.Context, id string) (*rdb.Task, error)
 }
 
-type task struct{}
-
-func NewTask() Task {
-	return &task{}
+type task struct {
+	*rdb.Queries
 }
 
-func (t *task) GetByID(ctx context.Context, id domain.TaskID) (*domain.Task, error) {
-	task, ok := dummyTasks[id]
-	if !ok {
-		return nil, errors.New("not found")
+func NewTask(q *rdb.Queries) Task {
+	return &task{
+		Queries: q,
+	}
+}
+
+func (t *task) Search(ctx context.Context, params rdb.SearchTasksParams) ([]*rdb.Task, error) {
+	tasks, err := t.Queries.SearchTasks(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return lo.ToSlicePtr(tasks), nil
+}
+
+func (t *task) GetByID(ctx context.Context, id string) (*rdb.Task, error) {
+	task, err := t.Queries.GetTask(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
-	return task, nil
+	return &task, nil
 }

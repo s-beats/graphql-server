@@ -3,35 +3,42 @@ package usecase
 import (
 	"context"
 
-	"github.com/s-beats/graphql-todo/domain"
-	"github.com/s-beats/graphql-todo/domain/repository"
+	"github.com/s-beats/graphql-todo/infra/rdb"
 	"github.com/s-beats/graphql-todo/util"
 )
 
 type User interface {
-	Create(ctx context.Context, name string) (*domain.User, error)
+	Create(ctx context.Context, name string) (*rdb.User, error)
 }
 
 type user struct {
-	userRepository repository.User
+	*rdb.Queries
 }
 
-func NewUser(userRepo repository.User) User {
+func NewUser(q *rdb.Queries) User {
 	return &user{
-		userRepository: userRepo,
+		Queries: q,
 	}
 }
 
-func (u *user) Create(ctx context.Context, name string) (*domain.User, error) {
-	user := domain.NewUser(
-		domain.NewUserID(util.NewUUID()),
-		name,
-	)
+func (u *user) Create(ctx context.Context, name string) (*rdb.User, error) {
+	id := util.NewUUID()
 
-	err := u.userRepository.Save(ctx, user)
+	affected, err := u.Queries.CreateUser(ctx, rdb.CreateUserParams{
+		ID:   id,
+		Name: name,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if affected == 0 {
+		return nil, errorFailedUpdateData()
+	}
+
+	user, err := u.Queries.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }

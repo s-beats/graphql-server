@@ -11,13 +11,17 @@ dc-down:
 	docker-compose down
 
 .PHONY: start
-start:dc-up
+start: dc-up
 	go run cmd/main.go
 
 .PHONY: exec-mysql
 exec-mysql: dc-up
-	docker container exec -it mysql mysql -u root -p
+	docker container exec -it graphql-todo-mysql mysql -u root -p
 
 .PHONY: init-db
 init-db: dc-up
-	docker container exec mysql sh /var/script/init_db.sh
+	docker container exec graphql-todo-mysql sh /var/script/init_db.sh
+
+.PHONY: generate-sqlc
+generate-sqlc:
+	sqlc generate
